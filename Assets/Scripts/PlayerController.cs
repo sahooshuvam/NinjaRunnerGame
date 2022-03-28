@@ -10,7 +10,9 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private Animator animator;
     private SpriteRenderer sprite;
+    ScoreManager score;
     float xInput;
+    bool isGrounded = true;
 
     // Start is called before the first frame update
     void Start()
@@ -18,6 +20,7 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         sprite = GetComponent<SpriteRenderer>();
+        score = GameObject.Find("ScoreManager").GetComponent<ScoreManager>();
     }
 
     // Update is called once per frame
@@ -26,26 +29,38 @@ public class PlayerController : MonoBehaviour
         animator.SetTrigger("isIdle");
         xInput = Input.GetAxis("Horizontal");
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded == true)
         {
             PlayerJump();
         }
 
-        if (xInput !=0)
+        else if (xInput !=0)
         {
             PlayerRun(xInput);
         }
        
 
-        if (Input.GetKeyDown(KeyCode.Q))
+        else if (Input.GetKeyDown(KeyCode.Q))
         {
             PlayerSlide();
         }
 
-        if (Input.GetKeyDown(KeyCode.E))
+        else if (Input.GetKeyDown(KeyCode.E))
         {
             PlayerAttack();
         }
+
+        else if (Input.GetKeyDown(KeyCode.RightShift) && isGrounded == true)
+        {
+            PlayerDoubleJump();
+        }
+    }
+
+    private void PlayerDoubleJump()
+    {
+        rb.AddForce(Vector3.up * jumpforce * 2);
+        animator.SetTrigger("isJumping");
+        isGrounded = false;
     }
 
     private void PlayerAttack()
@@ -60,8 +75,10 @@ public class PlayerController : MonoBehaviour
 
     private void PlayerJump()
     {
-            rb.AddForce(Vector3.up * jumpforce);
-            animator.SetTrigger("isJumping");        
+        rb.AddForce(Vector3.up * jumpforce);
+        animator.SetTrigger("isJumping");
+        isGrounded = false;
+             
     }
 
     private void PlayerRun(float xInput)
@@ -79,5 +96,19 @@ public class PlayerController : MonoBehaviour
         {
             sprite.flipX = true;
         }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.tag == "Coin")
+        {
+            score.ScoreCalculator(10);
+            other.gameObject.SetActive(false);
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        isGrounded = true;
     }
 }
