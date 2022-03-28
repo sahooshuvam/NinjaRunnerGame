@@ -105,6 +105,12 @@ public class PlayerController : MonoBehaviour
             score.ScoreCalculator(10);
             other.gameObject.SetActive(false);
         }
+
+        if (other.gameObject.tag == "FallDown")
+        {
+            gameObject.SetActive(false);
+            print("Game Over");
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
